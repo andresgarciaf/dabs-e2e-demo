@@ -1,0 +1,8 @@
+resources:
+  jobs:
+    nyctaxi_job:
+      name: '[${bundle.target}] nyctaxi_job'
+      tasks:
+        - task_key: refresh_pipeline
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.nyctaxi_pipeline.id}

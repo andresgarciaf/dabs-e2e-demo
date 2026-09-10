@@ -1,0 +1,46 @@
+# dabs-e2e-demo
+# One workspace, two identities:
+#   dev  -> you (profile sts-demo), deployed from the Databricks workspace
+#   prod -> service principal andresg-demo-sp, deployed by GitHub Actions
+bundle:
+  name: dabs-e2e-demo
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    description: Unity Catalog catalog for pipeline output.
+    default: sts
+  schema:
+    description: Output schema. Overridden per target.
+    default: e2e_demo_dev
+  source_table:
+    description: Source table the pipeline reads from.
+    default: samples.nyctaxi.trips
+
+targets:
+  # Dev: you deploy this from the Databricks workspace for quick iteration.
+  #   databricks bundle deploy -t dev -p sts-demo
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://adb-7405615905758195.15.azuredatabricks.net
+    variables:
+      schema: e2e_demo_dev
+
+  # Prod: GitHub Actions deploys this as the service principal.
+  # Locally you can reproduce it with: databricks bundle deploy -t prod -p sts-demo-sp
+  prod:
+    mode: production
+    workspace:
+      host: https://adb-7405615905758195.15.azuredatabricks.net
+      root_path: /Workspace/DevOps/${bundle.name}
+    variables:
+      schema: e2e_demo_prod
+    run_as:
+      service_principal_name: 1ca8ef92-3abb-48c7-b708-0ee2f9c9ef28
+    permissions:
+      - level: CAN_MANAGE
+        service_principal_name: 1ca8ef92-3abb-48c7-b708-0ee2f9c9ef28

@@ -1,0 +1,25 @@
+name: deploy-prod
+
+on:
+  push:
+    branches: [main]
+
+# Never let two prod deploys race.
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
+      DATABRICKS_CLIENT_SECRET: ${{ secrets.DATABRICKS_CLIENT_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: databricks/setup-cli@main
+      - name: Deploy bundle to prod
+        run: databricks bundle deploy -t prod
+      - name: Run the pipeline job (proves data lands in prod)
+        run: databricks bundle run nyctaxi_job -t prod

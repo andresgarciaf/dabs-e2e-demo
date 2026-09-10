@@ -1,0 +1,13 @@
+resources:
+  pipelines:
+    nyctaxi_pipeline:
+      name: '[${bundle.target}] nyctaxi_pipeline'
+      catalog: ${var.catalog}
+      schema: ${var.schema}
+      serverless: true
+      channel: current
+      configuration:
+        source_table: ${var.source_table}
+      libraries:
+        - file:
+            path: ../src/nyctaxi_pipeline.py
